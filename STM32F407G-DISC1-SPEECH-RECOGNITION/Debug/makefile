@@ -68,8 +68,8 @@ all: main-build
 main-build: STM32F407G-DISC1-SPEECH-RECOGNITION.elf secondary-outputs
 
 # Tool invocations
-STM32F407G-DISC1-SPEECH-RECOGNITION.elf STM32F407G-DISC1-SPEECH-RECOGNITION.map: $(OBJS) $(USER_OBJS) C:\Users\karim\Documents\Embedded\ ML\Audio-Classifier-Integration\STM32F407G-DISC1-SPEECH-RECOGNITION\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32F407G-DISC1-SPEECH-RECOGNITION.elf" @"objects.list" $(USER_OBJS) -Wl,--start-group $(LIBS) -Wl,--end-group -mcpu=cortex-m4 -T"C:\Users\karim\Documents\Embedded ML\Audio-Classifier-Integration\STM32F407G-DISC1-SPEECH-RECOGNITION\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F407G-DISC1-SPEECH-RECOGNITION.map" -Wl,--gc-sections -static -L../Middlewares/ST/ARM/DSP/Lib -L../Middlewares/ST/AI/Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32F407G-DISC1-SPEECH-RECOGNITION.elf STM32F407G-DISC1-SPEECH-RECOGNITION.map: $(OBJS) $(USER_OBJS) C:\Users\karim\Documents\github_projects\Embedded-Speech-Recognition-STM32F407\STM32F407G-DISC1-SPEECH-RECOGNITION\STM32F407VGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32F407G-DISC1-SPEECH-RECOGNITION.elf" @"objects.list" $(USER_OBJS) -Wl,--start-group $(LIBS) -Wl,--end-group -mcpu=cortex-m4 -T"C:\Users\karim\Documents\github_projects\Embedded-Speech-Recognition-STM32F407\STM32F407G-DISC1-SPEECH-RECOGNITION\STM32F407VGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32F407G-DISC1-SPEECH-RECOGNITION.map" -Wl,--gc-sections -static -L../Middlewares/ST/ARM/DSP/Lib -L../Middlewares/ST/AI/Lib --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

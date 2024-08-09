@@ -45,10 +45,17 @@ extern float32_t pcm_buffer[PCM_BUFFER_SIZE];
 extern int16_t pcm_buffer_int16[PCM_BUFFER_SIZE];
 extern I2S_HandleTypeDef hi2s2;
 
-// Include  FIR_Filter_Coef.h after defining FIR_TAPS
+/* Include  FIR_Filter_Coef.h after defining FIR_TAPS */
 #include "FIR_Filter_Coef.h"
 
 /* Functions -----------------------------------------------------------------*/
+
+/* Private Function ---------------*/
+
+void convert_to_pdm_float32(uint16_t* src, float32_t* dst, uint8_t buffer_to_process);
+void convert_pcm_f32_to_int16(float32_t* src, int16_t* dst, size_t len);
+
+/* Public Function ---------------*/
 
 /**
  * @brief Initializes the microphone and FIR decimation filter.
@@ -64,7 +71,5 @@ void microphone_start(void);
  * @brief Processes the microphone data if processing is needed.
  */
 uint8_t microphone_record_sample(void);
-
-void convert_pcm_f32_to_int16(float32_t* src, int16_t* dst, size_t len);
 
 #endif // MP45DT02_MEMS_MICROPHONE_H

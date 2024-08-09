@@ -23,8 +23,10 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
+/* Importing audio-utils for audio pre-processing and audio capture */
 #include "audio_utils.h"
 
+/* Importing Cube.AI Libraries for Model Building and Inference. */
 #include "audio_classifier_data.h"
 #include "audio_classifier.h"
 #include "ai_platform.h"
@@ -44,6 +46,15 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
+
+/* Define Model's output classes. */
+#define NO_CLASS                  0U
+#define NOISE_CLASS               1U
+#define YES_CLASS                 2U
+
+/* Define Model's output threshold. */
+#define DECISION_THRESHOLD        0.7
+
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -53,8 +64,11 @@ I2S_HandleTypeDef hi2s2;
 DMA_HandleTypeDef hdma_spi2_rx;
 
 /* USER CODE BEGIN PV */
+
+/* Array that stores 1s of PCM Audio Data. */
 int16_t pcm_recording_buffer[AUDIO_PCM_BUFFER_SIZE];
 
+/* Declaration of the audio_model handler. */
 static ai_handle audio_model = AI_HANDLE_NULL;
 
 /* Global c-array to handle the activations buffer */
@@ -83,29 +97,59 @@ static void MX_I2S2_Init(void);
 static void MX_CRC_Init(void);
 /* USER CODE BEGIN PFP */
 void USB_CDC_RxHandler(uint8_t*, uint32_t);
+
+/* AI Utility Functions that uses Cube.AI API. */
 int aiInit(void);
 int aiRun(const void*in_data, void *out_data);
+
+/* Led Turn on based on Model's Output `out_data`. */
 void led_turn_on(float *out_data);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+/**
+ * @brief Turn on LED based on the model's output.
+ *
+ * This function turns on specific LEDs connected to GPIOD based on the
+ * values in the model's output buffer. It lights up a green LED if the
+ * third element of the output buffer is greater than 0.7, and a red LED
+ * if the first element is greater than 0.7. The LEDs remain on for 1 second.
+ *
+ * @param[out] out_data Pointer to the model's output buffer.
+ */
 void led_turn_on(float *out_data) {
 
-	if ( out_data[2] > 0.7 ) {
+	if ( out_data[YES_CLASS] > DECISION_THRESHOLD ) {
+		/* Turn on Green Led. */
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12, GPIO_PIN_SET);
 		HAL_Delay(1000);
 	}
 
-	if ( out_data[0] > 0.7 ) {
+	if ( out_data[NO_CLASS] > DECISION_THRESHOLD ) {
+		/* Turn on Red Led. */
 		HAL_GPIO_WritePin(GPIOD, GPIO_PIN_14, GPIO_PIN_SET);
 		HAL_Delay(1000);
 	}
 
-
-
+	/* Turn off all Led. */
 	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_12|GPIO_PIN_14, GPIO_PIN_RESET);
 }
+
+/**
+ * @brief Initialize the AI model for audio classification.
+ *
+ * This function sets up and initializes the AI audio classification model by
+ * creating the model instance and retrieving input and output tensor pointers.
+ * It uses an array of activation functions to configure the model's layers.
+ *
+ * @return Returns 0 on successful initialization.
+ *
+ * @note Ensure that the activations array is defined before calling this
+ * function, as it is used to configure the model.
+ */
 int aiInit(void) {
 
   /* Array of activation functions */
@@ -121,6 +165,23 @@ int aiInit(void) {
   return 0;
 }
 
+/**
+ * @brief Run inference on the AI model with the given input data.
+ *
+ * This function performs inference using the AI audio classification model.
+ * It updates the input and output tensor data handlers with the provided
+ * data pay-loads, executes the model, and handles any errors that occur
+ * during the inference process.
+ *
+ * @param[in] in_data Pointer to the input data to be processed by the model.
+ * @param[out] out_data Pointer to the buffer where the model's output data
+ * will be stored.
+ *
+ * @return Returns 0 on successful execution of the inference.
+ *
+ * @note The function assumes that the model has been properly initialized
+ * before calling this function.
+ */
 int aiRun(const void*in_data, void *out_data) {
 	ai_i32 n_batch;
 
@@ -130,13 +191,14 @@ int aiRun(const void*in_data, void *out_data) {
 
 	/* Perform the inference */
 	n_batch = ai_audio_classifier_run(audio_model, &ai_input[0], &ai_output[0]);
+
 	if (n_batch != 1) {
 		ai_audio_classifier_get_error(audio_model);
-		Error_Handler();
+		for(;;);
 	};
-
 	return 0;
 }
+
 /* USER CODE END 0 */
 
 /**
@@ -171,9 +233,14 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_CRC_Init();
   /* USER CODE BEGIN 2 */
+
+  /* Audio Init Functions */
   audio_preprocessing_init();
   audio_init();
+
+  /* AI Model Init function. */
   aiInit();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -184,15 +251,19 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+	/* Record 1s of Audio Data and save it in pcm_recording_buffer */
 	audio_pcm_record(&pcm_recording_buffer[0],
 			AUDIO_PCM_BUFFER_SIZE);
 
+	/* Generate a logMelSpectrogram matrix and save it in in_data model's input buffer*/
 	audio_logMelSpectrogram(pcm_recording_buffer,
 			&in_data[0],
 			AUDIO_PCM_BUFFER_SIZE);
 
+	/* Run Model inference. */
 	aiRun(&in_data[0], &out_data[0]);
 
+	/* Decide which Led should turn on. */
 	led_turn_on(&out_data[0]);
 
   }

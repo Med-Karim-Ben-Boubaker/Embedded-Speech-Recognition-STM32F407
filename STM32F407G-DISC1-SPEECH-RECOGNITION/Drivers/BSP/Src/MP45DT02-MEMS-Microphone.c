@@ -39,15 +39,13 @@ float32_t pdm_float_buffer[FLOAT32_PDM_BUFFER_SIZE];
 /* FIR filter state buffer */
 float32_t fir_state[FIR_STATE_BUFFER_SIZE];
 
-// FIR filter parameters
+/* FIR filter Parameters. */
 uint8_t fir_decimation_factor = FIR_DECIMATION_FACTOR;
 uint16_t fir_num_taps = FIR_TAPS;
 uint32_t fir_block_size = FLOAT32_PDM_BUFFER_SIZE;
 
 /* FIR decimation filter instance */
 arm_fir_decimate_instance_f32 fir_decimate_f32;
-
-void convert_to_pdm_float32(uint16_t* src, float32_t* dst, uint8_t buffer_to_process);
 
 /* Functions -----------------------------------------------------------------*/
 
@@ -75,6 +73,7 @@ void microphone_start(void) {
 	/* Initialize DMA State */
 	dma_transfer_state = OFFSET_NONE;
 
+	/* Start DMA Call Backs */
     HAL_I2S_Receive_DMA(&hi2s2, pdm_buffer, PDM_BUFFER_DOUBLE_SIZE);
 }
 
@@ -98,13 +97,17 @@ uint8_t microphone_record_sample(void) {
             fir_block_size
         );
 
+        /* Convert float pcm values to 16-bit values */
         convert_pcm_f32_to_int16(pcm_buffer, pcm_buffer_int16, PCM_BUFFER_SIZE);
 
+        /* Update DMA state after completing processing. */
         dma_transfer_state = OFFSET_NONE;
 
+        /* Done Recording 16 PCM Samples. */
         return 1;
     }
 
+    /* Still Recording 16 PCM Samples. */
     return 0;
 }
 

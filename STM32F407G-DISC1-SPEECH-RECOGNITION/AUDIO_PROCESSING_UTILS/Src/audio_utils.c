@@ -1,10 +1,24 @@
-/*
- * audio_record.c
+/**
+ ******************************************************************************
+ * @file           : audio_utils.c
+ * @brief          : This module contains functions for initializing and processing
+ *                    audio data from the microphone. It includes functionalities
+ *                    for initializing audio components, recording audio samples,
+ *                    computing log mel spectrograms, and streaming PCM data over USB.
+ *                    The CMSIS-DSP library is used for various signal processing
+ *                    tasks, including real fast Fourier transform (RFFT), mel filterbank,
+ *                    and log mel spectrogram calculations.
  *
- *  Created on: Jul 28, 2024
- *      Author: karim
+ * @author          : Ben Boubaker Karim
+ * @date            : 2024-Aug
+ ******************************************************************************
  */
+
+/* Includes ------------------------------------------------------------------*/
+
 #include "audio_utils.h"
+
+/* Variables -----------------------------------------------------------------*/
 
 /* Instance for floating-point RFFT/RIFFT */
 arm_rfft_fast_instance_f32 rfft;
@@ -50,33 +64,45 @@ uint32_t mel_filter_start_indices[NUM_MELS];
 /* Intermediate buffer that contains the Mel filter coefficients stop indices */
 uint32_t mel_filter_stop_indices[NUM_MELS];
 
+/* Functions -----------------------------------------------------------------*/
+
 /* Initialize audio processing structures */
 void audio_preprocessing_init(void);
 
+/**
+ * @brief Initialize and start the audio recording system.
+ *
+ * This function initializes the microphone and starts audio recording.
+ * It sets up the microphone hardware and begins capturing audio data.
+ *
+ * @note Ensure that the microphone hardware is properly configured
+ * before calling this function. This function assumes that
+ * the microphone initialization and start procedures are handled by
+ * `microphone_init()` and `microphone_start()`, respectively.
+ */
 void audio_init(void) {
-
-	microphone_init();
-
-	microphone_start();
-}
-void audio_spectrogram(int16_t *input_signal, float32_t *out_spect,
-		uint32_t signal_len) {
-
-	for (uint32_t frame_index = 0; frame_index < num_frames; frame_index++) {
-
-		/* Convert 16-bit PCM into normalized floating point values */
-		buf_to_float_normed(&input_signal[HOP_LEN * frame_index], frame_buffer,
-		FRAME_LEN);
-
-		SpectrogramColumn(&spectrogram, frame_buffer, spectrogram_col_buffer);
-
-		/* Reshape column into `out_spectrogram` */
-		for (uint32_t i = 0; i < MELSPECTROGRAM_SAMPLE_SIZE; i++) {
-			out_spect[frame_index * MELSPECTROGRAM_SAMPLE_SIZE + i] = spectrogram_col_buffer[i];
-		}
-	}
+    microphone_init();
+    microphone_start();
 }
 
+/**
+ * @brief Compute the log mel spectrogram from an audio signal.
+ *
+ * This function processes an input audio signal to compute the log mel
+ * spectrogram. It converts 16-bit PCM audio samples into normalized
+ * floating-point values, processes them frame by frame, and fills the
+ * output buffer with the computed log mel spectrogram values.
+ *
+ * @param[in] input_signal Pointer to the input audio signal in 16-bit PCM format.
+ * @param[out] out_melSpect Pointer to the output buffer where the log mel
+ * spectrogram values will be stored.
+ * @param[in] signal_len Length of the input audio signal.
+ *
+ * @note The function processes the signal in frames, and the output buffer
+ * must be large enough to hold all computed log mel spectrogram values for
+ * each frame. Ensure `num_frames`, `HOP_LEN`, `FRAME_LEN`, and
+ * `MELSPECTROGRAM_SAMPLE_SIZE` are correctly defined for the input signal.
+ */
 void audio_logMelSpectrogram(int16_t* input_signal, float32_t* out_melSpect,
 		uint32_t signal_len) {
 
@@ -88,18 +114,25 @@ void audio_logMelSpectrogram(int16_t* input_signal, float32_t* out_melSpect,
 
 		LogMelSpectrogramColumn(&log_mel_spectrogram, frame_buffer, logMelSpectrogram_col_buffer);
 
-		/* Reshape column into `out_spectrogram` */
+		/* Reshape column into `out_melSpect` */
 		for (uint32_t i = 0; i < MELSPECTROGRAM_SAMPLE_SIZE; i++) {
 			out_melSpect[frame_index * MELSPECTROGRAM_SAMPLE_SIZE + i] = logMelSpectrogram_col_buffer[i];
 		}
 	}
 }
+
 /**
- * @brief Initialize the data structures to preprocess the audio signal.
+ * @brief Initialize audio preprocessing components.
  *
- * @param  None
+ * This function initializes various components required for audio preprocessing,
+ * including the window function, real fast Fourier transform (RFFT), mel filterbank,
+ * spectrogram, mel spectrogram, and log mel spectrogram configurations.
+ * It ensures that all components are set up with the correct parameters before
+ * starting audio processing.
  *
- * @retval None
+ * @note The function contains infinite loops as error handlers if any
+ * initialization step fails. Ensure that the configurations are correctly set
+ * before calling this function.
  */
 void audio_preprocessing_init(void) {
 	/* Init window function */
@@ -150,8 +183,24 @@ void audio_preprocessing_init(void) {
 
 }
 
+/**
+ * @brief Record audio samples into a buffer.
+ *
+ * This function records audio samples into the provided buffer. It toggles
+ * an orange LED to indicate the start of the recording phase and fills the
+ * buffer with audio samples segment by segment until the entire buffer is filled.
+ *
+ * @param[out] dst Pointer to the destination buffer where recorded audio
+ * samples will be stored.
+ * @param[in] buffer_size Size of the destination buffer in number of samples.
+ *
+ * @note The buffer size should be a multiple of PCM_BUFFER_SIZE to ensure
+ * that each segment is filled correctly. The function blocks until the
+ * entire buffer is filled.
+ */
 void audio_pcm_record(int16_t* dst, size_t buffer_size) {
 
+	/* Toggle Orange Led to Indicate Starting of a Recording phase. */
 	HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13);
 
     /* Calculate the total number of segments needed */
