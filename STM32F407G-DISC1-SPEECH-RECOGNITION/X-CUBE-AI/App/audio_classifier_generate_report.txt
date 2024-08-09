@@ -1,0 +1,178 @@
+Neural Network Tools for STM32 family v1.7.0 (stm.ai v8.1.0-19520)
+Created date          : 2024-08-09 11:16:28
+Parameters            : generate --name audio_classifier -m C:/Users/karim/Documents/Embedded ML/TinyML-Audio-Classification/models/model_no_quant.tflite --type tflite --compression none --verbosity 1 --workspace C:\Users\karim\AppData\Local\Temp\mxAI_workspace70354294452400010941343417817906580 --output C:\Users\karim\.stm32cubemx\network_output --allocate-inputs --series stm32f4 --allocate-outputs
+
+Exec/report summary (generate)
+-----------------------------------------------------------------------------------------------------------------------
+model file         :   C:\Users\karim\Documents\Embedded ML\TinyML-Audio-Classification\models\model_no_quant.tflite   
+type               :   tflite                                                                                          
+c_name             :   audio_classifier                                                                                
+compression        :   none                                                                                            
+options            :   allocate-inputs, allocate-outputs                                                               
+optimization       :   balanced                                                                                        
+target/series      :   stm32f4                                                                                         
+workspace dir      :   C:\Users\karim\AppData\Local\Temp\mxAI_workspace70354294452400010941343417817906580             
+output dir         :   C:\Users\karim\.stm32cubemx\network_output                                                      
+model_fmt          :   float                                                                                           
+model_name         :   model_no_quant                                                                                  
+model_hash         :   462c10869f11a63826c0370d82586120                                                                
+params #           :   9,867 items (38.54 KiB)                                                                         
+-----------------------------------------------------------------------------------------------------------------------
+input 1/1          :   'serving_default_keras_tensor0' (domain:activations/**default**)                                
+                   :   4880 items, 19.06 KiB, ai_float, float, (1,122,40,1)                                            
+output 1/1         :   'nl_6' (domain:activations/**default**)                                                         
+                   :   3 items, 12 B, ai_float, float, (1,3)                                                           
+macc               :   102,560                                                                                         
+weights (ro)       :   39,468 B (38.54 KiB) (1 segment)                                                                
+activations (rw)   :   23,616 B (23.06 KiB) (1 segment) *                                                              
+ram (total)        :   23,616 B (23.06 KiB) = 23,616 + 0 + 0                                                           
+-----------------------------------------------------------------------------------------------------------------------
+(*) 'input'/'output' buffers can be used from the activations buffer
+
+Model name - model_no_quant ['serving_default_keras_tensor0'] ['nl_6']
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+m_id   layer (type,original)                     oshape                       param/size         macc                    connected to   | c_size          c_macc            c_type                      
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+0      serving_default_keras_tensor0 (Input, )   [b:1,h:122,h:122,w:40,c:1]                                                             |                 +4,096(+100.0%)   upsample_of32[0]            
+       upsample_0 (Upsample, RESIZE_BILINEAR)    [b:1,h:32,h:32,w:32,c:1]                       4,096   serving_default_keras_tensor0   |                 -4,096(-100.0%)   
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+1      conv2d_1 (Conv2D, CONV_2D)                [b:1,h:13,h:13,w:13,c:8]     520/2,080        86,536                      upsample_0   |                 +1,352(+1.6%)     conv2d_of32/nl_of32[1, 2]   
+       nl_1_nl (Nonlinearity, CONV_2D)           [b:1,h:13,h:13,w:13,c:8]                       1,352                        conv2d_1   |                 -1,352(-100.0%)   
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+2      pool_2 (Pool, MAX_POOL_2D)                [b:1,h:6,h:6,w:6,c:8]                          1,152                         nl_1_nl   |                                   pool_of32[3]                
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+3      reshape_3 (Reshape, RESHAPE)              [b:1,c:288]                                                                   pool_2   |                                   
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+4      arith_constant3 (Placeholder, )           [h:32,h:32,c:288]            9,216/36,864                                              | +128(+0.3%)     +9,280(+100.0%)   dense_of32/nl_of32[4, 5]    
+       arith_constant4 (Placeholder, )           [c:32]                       32/128                                                    | -128(-100.0%)                     
+       gemm_4 (Gemm, FULLY_CONNECTED)            [b:1,c:32]                                     9,248                       reshape_3   |                 -9,248(-100.0%)   
+                                                                                                                      arith_constant3   | 
+                                                                                                                      arith_constant4   | 
+       nl_4_nl (Nonlinearity, FULLY_CONNECTED)   [b:1,c:32]                                        32                          gemm_4   |                 -32(-100.0%)      
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+5      arith_constant2 (Placeholder, )           [h:3,h:3,c:32]               96/384                                                    | +12(+3.1%)      +99(+100.0%)      dense_of32[6]               
+       arith_constant5 (Placeholder, )           [c:3]                        3/12                                                      | -12(-100.0%)                      
+       gemm_5 (Gemm, FULLY_CONNECTED)            [b:1,c:3]                                         99                         nl_4_nl   |                 -99(-100.0%)      
+                                                                                                                      arith_constant2   | 
+                                                                                                                      arith_constant5   | 
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+6      nl_6 (Nonlinearity, SOFTMAX)              [b:1,c:3]                                         45                          gemm_5   |                                   nl_of32[o][7]               
+------ ----------------------------------------- ---------------------------- -------------- -------- ------------------------------- --- --------------- ----------------- --------------------------- 
+model/c-model: macc=102,560/102,560  weights=39,468/39,468  activations=--/23,616 io=--/0
+
+
+
+Generated C-graph summary
+------------------------------------------------------------------------------------------------------------------------
+model name            : model_no_quant
+c-name                : audio_classifier
+c-node #              : 8
+c-array #             : 15
+activations size      : 23616 (1 segment)
+weights size          : 39468 (1 segment)
+macc                  : 102560
+inputs                : ['serving_default_keras_tensor0_output']
+outputs               : ['nl_6_output']
+
+C-Arrays (15)
+------ -------------------------------------- ------------ ------------------------- ------------- --------- --------- 
+c_id   name (*_array)                         item/size    domain/mem-pool           c-type        fmt       comment   
+------ -------------------------------------- ------------ ------------------------- ------------- --------- --------- 
+0      gemm_5_output                          3/12         activations/**default**   float         float32             
+1      nl_6_output                            3/12         activations/**default**   float         float32   /output   
+2      conv2d_1_weights                       512/2048     weights/weights           const float   float32             
+3      conv2d_1_bias                          8/32         weights/weights           const float   float32             
+4      gemm_4_weights                         9216/36864   weights/weights           const float   float32             
+5      gemm_4_bias                            32/128       weights/weights           const float   float32             
+6      gemm_5_weights                         96/384       weights/weights           const float   float32             
+7      serving_default_keras_tensor0_output   4880/19520   activations/**default**   float         float32   /input    
+8      gemm_5_bias                            3/12         weights/weights           const float   float32             
+9      upsample_0_output                      1024/4096    activations/**default**   float         float32             
+10     conv2d_1_output                        1352/5408    activations/**default**   float         float32             
+11     nl_1_nl_output                         1352/5408    activations/**default**   float         float32             
+12     pool_2_output                          288/1152     activations/**default**   float         float32             
+13     gemm_4_output                          32/128       activations/**default**   float         float32             
+14     nl_4_nl_output                         32/128       activations/**default**   float         float32             
+------ -------------------------------------- ------------ ------------------------- ------------- --------- --------- 
+
+C-Layers (8)
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+c_id   name (*_layer)   id   layer_type   macc    rom     tensors                                   shape (array id)   
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+0      upsample_0       0    upsample     4096    0       I: serving_default_keras_tensor0_output   (1,122,40,1) (7)   
+                                                          O: upsample_0_output                      (1,32,32,1) (9)    
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+1      conv2d_1         1    conv2d       86536   2080    I: upsample_0_output                      (1,32,32,1) (9)    
+                                                          W: conv2d_1_weights                       (1,8,8,8) (2)      
+                                                          W: conv2d_1_bias                          (8,) (3)           
+                                                          O: conv2d_1_output                        (1,13,13,8) (10)   
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+2      nl_1_nl          1    nl           1352    0       I: conv2d_1_output                        (1,13,13,8) (10)   
+                                                          O: nl_1_nl_output                         (1,13,13,8) (11)   
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+3      pool_2           2    pool         1152    0       I: nl_1_nl_output                         (1,13,13,8) (11)   
+                                                          O: pool_2_output                          (1,6,6,8) (12)     
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+4      gemm_4           4    dense        9248    36992   I: pool_2_output0                         (1,288) (12)       
+                                                          W: gemm_4_weights                         (288,32) (4)       
+                                                          W: gemm_4_bias                            (32,) (5)          
+                                                          O: gemm_4_output                          (1,32) (13)        
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+5      nl_4_nl          4    nl           32      0       I: gemm_4_output                          (1,32) (13)        
+                                                          O: nl_4_nl_output                         (1,32) (14)        
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+6      gemm_5           5    dense        99      396     I: nl_4_nl_output                         (1,32) (14)        
+                                                          W: gemm_5_weights                         (32,3) (6)         
+                                                          W: gemm_5_bias                            (3,) (8)           
+                                                          O: gemm_5_output                          (1,3) (0)          
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+7      nl_6             6    nl           45      0       I: gemm_5_output                          (1,3) (0)          
+                                                          O: nl_6_output                            (1,3) (1)          
+------ ---------------- ---- ------------ ------- ------- ----------------------------------------- ------------------ 
+
+
+
+Number of operations per c-layer
+------- ------ ----------------------- --------- -------------- -------- ---------- 
+c_id    m_id   name (type)                   #op           type   #param   sparsity 
+------- ------ ----------------------- --------- -------------- -------- ---------- 
+0       0      upsample_0 (upsample)       4,096   smul_f32_f32          
+1       1      conv2d_1 (conv2d)          86,536   smul_f32_f32      520     0.0000 
+2       1      nl_1_nl (nl)                1,352     op_f32_f32          
+3       2      pool_2 (pool)               1,152     op_f32_f32          
+4       4      gemm_4 (dense)              9,248   smul_f32_f32    9,248     0.0000 
+5       4      nl_4_nl (nl)                   32     op_f32_f32          
+6       5      gemm_5 (dense)                 99   smul_f32_f32       99     0.0000 
+7       6      nl_6 (nl)                      45     op_f32_f32          
+------- ------ ----------------------- --------- -------------- -------- ---------- 
+total                                    102,560                   9,867     0.0000 
+
+Number of operation types
+---------------- -------- ----------- 
+operation type          #           % 
+---------------- -------- ----------- 
+smul_f32_f32       99,979       97.5% 
+op_f32_f32          2,581        2.5% 
+
+Complexity report (model)
+------ ------------------------------- ------------------------- ------------------------- -------- 
+m_id   name                            c_macc                    c_rom                     c_id     
+------ ------------------------------- ------------------------- ------------------------- -------- 
+0      serving_default_keras_tensor0   |                  4.0%   |                  0.0%   [0]      
+1      conv2d_1                        ||||||||||||||||  85.7%   |                  5.3%   [1, 2]   
+2      pool_2                          |                  1.1%   |                  0.0%   [3]      
+4      arith_constant3                 ||                 9.0%   ||||||||||||||||  93.7%   [4, 5]   
+5      arith_constant2                 |                  0.1%   |                  1.0%   [6]      
+6      nl_6                            |                  0.0%   |                  0.0%   [7]      
+------ ------------------------------- ------------------------- ------------------------- -------- 
+macc=102,560 weights=39,468 act=23,616 ram_io=0
+
+Generated files (7)
+--------------------------------------------------------------------------- 
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier_config.h        
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier.h               
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier.c               
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier_data_params.h   
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier_data_params.c   
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier_data.h          
+C:\Users\karim\.stm32cubemx\network_output\audio_classifier_data.c          
