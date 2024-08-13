@@ -3,6 +3,7 @@
 
 ![RTOS Implimentation](https://img.shields.io/badge/RTOS_Implimentation-In_Progress-orange)
 ![RTOS Implimentation](https://img.shields.io/badge/license-MIT-green)
+![RTOS Implimentation](https://img.shields.io/badge/Version-v1.0.0-blue)
 ## Overview
 
 This project aims to implement a speech command recognition system on an STM32F407 Discovery board with **112KB** of **RAM**. The system is designed to predict two keywords, "yes" and "no," while classifying other sounds as "noise." It utilizes embedded audio processing and deep learning techniques to achieve efficient speech recognition on a micro-controller platform.
